@@ -1163,6 +1163,7 @@ body {
   background: var(--bg-secondary);
   border-radius: var(--radius-xl);
   padding: 24px;
+  margin-bottom: var(--space-8); /* Added 32px space above toolbar */
   box-shadow: var(--shadow-card);
 }
 
