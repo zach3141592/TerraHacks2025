@@ -1195,6 +1195,162 @@ body {
   opacity: 0.8;
 }
 
+/* Recent Scans Header */
+.recent-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.scan-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-tertiary);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Scans List */
+.scans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Scan Card */
+.scan-card {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.scan-card:hover {
+  background: var(--bg-secondary);
+  border-color: var(--primary-blue);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card);
+}
+
+.scan-card:active {
+  transform: translateY(0);
+}
+
+.scan-icon {
+  font-size: 24px;
+  width: 48px;
+  height: 48px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.scan-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.scan-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  gap: 12px;
+}
+
+.scan-type {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.scan-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.scan-preview {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scan-arrow {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.scan-card:hover .scan-arrow {
+  opacity: 1;
+  color: var(--primary-blue);
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 16px;
+  color: var(--text-secondary);
+}
+
+.spinner-small {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--gray-200);
+  border-top: 2px solid var(--primary-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Mobile responsiveness for scan cards */
+@media (max-width: 480px) {
+  .scan-card {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .scan-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  .scan-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .scan-type {
+    font-size: 15px;
+  }
+  
+  .scan-preview {
+    font-size: 13px;
+  }
+}
+
 /* Profile Page Styles */
 .profile-header {
   background: var(--bg-secondary);

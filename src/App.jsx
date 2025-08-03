@@ -1,6 +1,7 @@
-import { useState, useRef, useCallback } from 'react';
-import { Camera, Upload, RotateCcw, CheckCircle, AlertCircle, Settings, Activity, Scan, Home, User, Mail, Lock, Eye, EyeOff, Clock, Heart, Circle, CheckCircle2 } from 'lucide-react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { Camera, Upload, RotateCcw, CheckCircle, AlertCircle, Settings, Activity, Scan, Home, User, Mail, Lock, Eye, EyeOff, Clock, Heart, Circle, CheckCircle2, History, Trash2 } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import databaseService from './services/database';
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || 'your-api-key-here');
@@ -411,7 +412,43 @@ function LoadingOverlay({ message }) {
   );
 }
 
-function HomePage() {
+function RecentScanCard({ scan, onView }) {
+  const formatDate = (date) => {
+    const now = new Date();
+    const scanDate = new Date(date);
+    const diffTime = Math.abs(now - scanDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) return 'Today';
+    if (diffDays === 2) return 'Yesterday';
+    if (diffDays <= 7) return `${diffDays - 1} days ago`;
+    return scanDate.toLocaleDateString();
+  };
+
+  const conditionIcon = CONDITIONS.find(c => c.id === scan.condition_type)?.icon || '📋';
+
+  return (
+    <div className="scan-card" onClick={() => onView(scan)}>
+      <div className="scan-icon">
+        {conditionIcon}
+      </div>
+      <div className="scan-content">
+        <div className="scan-header">
+          <span className="scan-type">{scan.conditionLabel}</span>
+          <span className="scan-date">{formatDate(scan.date)}</span>
+        </div>
+        <div className="scan-preview">
+          {scan.observations ? scan.observations.substring(0, 80) + '...' : 'Analysis completed'}
+        </div>
+      </div>
+      <div className="scan-arrow">
+        <Eye size={16} />
+      </div>
+    </div>
+  );
+}
+
+function HomePage({ recentScans, isDatabaseLoading, onViewScan }) {
   return (
     <div className="page-content fade-in">
       <div className="welcome-section">
@@ -459,12 +496,36 @@ function HomePage() {
       </div>
 
       <div className="recent-section">
-        <h3>Recent Scans</h3>
-        <div className="empty-state">
-          <Activity size={48} />
-          <p>No recent scans</p>
-          <span>Start your first medical scan to see results here</span>
+        <div className="recent-header">
+          <h3>Recent Scans</h3>
+          <div className="scan-count">
+            <History size={16} />
+            <span>{recentScans.length}</span>
+          </div>
         </div>
+        
+        {isDatabaseLoading ? (
+          <div className="loading-state">
+            <div className="spinner-small"></div>
+            <span>Loading recent scans...</span>
+          </div>
+        ) : recentScans.length > 0 ? (
+          <div className="scans-list">
+            {recentScans.map((scan) => (
+              <RecentScanCard 
+                key={scan.id} 
+                scan={scan} 
+                onView={onViewScan}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state">
+            <Activity size={48} />
+            <p>No recent scans</p>
+            <span>Start your first medical scan to see results here</span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -736,10 +797,55 @@ function App() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [error, setError] = useState('');
+  const [recentScans, setRecentScans] = useState([]);
+  const [isDatabaseLoading, setIsDatabaseLoading] = useState(true);
   
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  // Initialize database and load recent scans
+  useEffect(() => {
+    const initializeDatabase = async () => {
+      try {
+        await databaseService.initialize();
+        await loadRecentScans();
+      } catch (error) {
+        console.error('Failed to initialize database:', error);
+        setError('Failed to initialize local database. Some features may not work properly.');
+      } finally {
+        setIsDatabaseLoading(false);
+      }
+    };
+
+    initializeDatabase();
+  }, []);
+
+  const loadRecentScans = useCallback(async () => {
+    try {
+      const scans = await databaseService.getRecentScans(10);
+      setRecentScans(scans);
+    } catch (error) {
+      console.error('Failed to load recent scans:', error);
+    }
+  }, []);
+
+  const handleViewScan = useCallback((scan) => {
+    // Convert stored scan data back to the format expected by the analysis view
+    const analysisResult = {
+      abnormalities: scan.observations,
+      timeline: scan.timeline,
+      tips: scan.recommendations
+    };
+    
+    setAnalysisResult(analysisResult);
+    setCurrentPage('scan');
+    setCurrentView('analysis');
+    
+    // Reset photo and condition data since we're viewing a historical scan
+    setCapturedPhoto(null);
+    setSelectedCondition(scan.condition_type);
+  }, []);
 
   const startCamera = useCallback(async () => {
     try {
@@ -877,6 +983,20 @@ IMPORTANT: Do not provide medical diagnoses. This is for informational purposes 
       setAnalysisResult(sections);
       setCurrentView('analysis');
       
+      // Save scan to database
+      try {
+        await databaseService.saveScan({
+          conditionType: selectedCondition,
+          photoData: capturedPhoto,
+          analysisResult: sections
+        });
+        // Reload recent scans to update the home page
+        await loadRecentScans();
+      } catch (dbError) {
+        console.error('Failed to save scan to database:', dbError);
+        // Don't show error to user as analysis was successful
+      }
+      
     } catch (err) {
       setError('Analysis failed. Please check your internet connection and try again.');
       console.error('Analysis error:', err);
@@ -974,7 +1094,13 @@ IMPORTANT: Do not provide medical diagnoses. This is for informational purposes 
       <NavigationHeader onReset={resetApp} />
 
       <main className="main-content">
-        {currentPage === 'home' && <HomePage />}
+        {currentPage === 'home' && (
+        <HomePage 
+          recentScans={recentScans} 
+          isDatabaseLoading={isDatabaseLoading}
+          onViewScan={handleViewScan}
+        />
+      )}
         
         {currentPage === 'profile' && <ProfilePage onSignOut={() => setIsAuthenticated(false)} />}
         
