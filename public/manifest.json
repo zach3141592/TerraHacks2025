@@ -1,0 +1,40 @@
+{
+  "name": "DailyScan - Medical Photo Analysis",
+  "short_name": "DailyScan",
+  "description": "AI-powered medical photo analysis assistant for cuts, bruises, moles, hives, and phlegm",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f2f2f7",
+  "theme_color": "#007AFF",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["health", "medical", "productivity"],
+  "shortcuts": [
+    {
+      "name": "New Scan",
+      "short_name": "Scan",
+      "description": "Start a new medical photo analysis",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/logo.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
