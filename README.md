@@ -1,23 +1,4 @@
-# DailyScan - Medical Photo Analysis Assistant
-
-A mobile-first web application that uses Google's Gemini AI to analyze medical photos and provide insights on cuts, bruises, moles, hives, and phlegm conditions.
-
-## Features
-
-- 📱 **Mobile-Optimized**: Designed specifically for mobile usage with responsive design
-- 📸 **Camera Integration**: Capture photos directly from your device's camera
-- 🔍 **AI Analysis**: Powered by Google's Gemini AI for intelligent photo analysis
-- ⏱️ **Healing Timeline**: Get estimated recovery timelines for conditions
-- 💡 **Healing Tips**: Receive evidence-based recommendations for faster healing
-- 🎨 **Clean UI**: Elegant black and white design that's classy and simple
-
-## Supported Conditions
-
-- **Cuts/Wounds**: Open wounds, lacerations, scratches
-- **Bruises**: Contusions, black and blue marks
-- **Moles/Spots**: Skin spots, moles, unusual marks
-- **Hives/Rash**: Skin irritation, bumps, redness
-- **Phlegm/Mucus**: Respiratory secretions
+# DailyScan
 
 ## Setup Instructions
 
@@ -45,17 +26,15 @@ cp .env.example .env
 
 Edit the `.env` file and replace the placeholder with your actual API key:
 
-```env
+````env
 VITE_GEMINI_API_KEY=your_actual_api_key_here
-```
-
-⚠️ **Important**: Never commit your actual API key to version control. The `.env` file is already added to `.gitignore` to protect your sensitive data.
+``
 
 ### 4. Run the Application
 
 ```bash
 npm run dev
-```
+````
 
 The app will be available at `http://localhost:5173`
 
@@ -120,22 +99,7 @@ src/
 └── assets/          # Static assets
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly on mobile devices
-5. Submit a pull request
-
-## Privacy & Security
-
-- Photos are processed locally and sent only to Google's Gemini API
-- No photos are stored permanently on our servers
-- API calls are made directly from your browser
-- Follow Google's AI usage policies and terms of service
-
-## License
+# License
 
 This project is for educational and personal use. Please ensure compliance with medical software regulations if using in professional settings.
 
@@ -149,5 +113,3 @@ For issues or questions:
 4. Try refreshing the page or restarting the browser
 
 ---
-
-Built with ❤️ for better health monitoring and awareness.
