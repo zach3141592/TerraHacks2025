@@ -549,6 +549,70 @@ body {
   font-size: 15px;
   line-height: 1.6;
   color: var(--text-secondary);
+  white-space: pre-line; /* Preserve line breaks for structured content */
+}
+
+/* Structured Analysis Content */
+.analysis-card .structured-content {
+  margin: 0;
+  padding: 0;
+}
+
+.analysis-card .structured-content strong,
+.analysis-card .structured-content b {
+  color: var(--text-primary);
+  font-weight: 700;
+  display: block;
+  margin: 12px 0 8px 0;
+}
+
+.analysis-card .structured-content strong:first-child,
+.analysis-card .structured-content b:first-child {
+  margin-top: 0;
+}
+
+/* Bullet Point Styling */
+.analysis-card ul {
+  margin: 8px 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.analysis-card li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.analysis-card li:before {
+  content: "•";
+  color: var(--primary-blue);
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* Stage Timeline Formatting */
+.analysis-card .stage-item {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin: 8px 0;
+  border-left: 3px solid var(--primary-blue);
+}
+
+.analysis-card .stage-title {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.analysis-card .stage-description {
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 /* Alert Messages */

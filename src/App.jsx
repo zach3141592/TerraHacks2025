@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Camera, Upload, RotateCcw, CheckCircle, AlertCircle, Settings, Activity, Scan, Home, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Camera, Upload, RotateCcw, CheckCircle, AlertCircle, Settings, Activity, Scan, Home, User, Mail, Lock, Eye, EyeOff, Clock, Heart } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize Gemini AI
@@ -233,29 +233,72 @@ function ConditionSelection({ conditions, selectedCondition, onSelect }) {
 }
 
 function AnalysisSection({ result, onNewScan }) {
+  const formatContent = (content) => {
+    if (!content) return 'No information available.';
+    
+    // Convert bullet points to HTML list items
+    const lines = content.split('\n').filter(line => line.trim());
+    const hasListItems = lines.some(line => line.trim().startsWith('•'));
+    
+    if (hasListItems) {
+      return (
+        <ul>
+          {lines.map((line, index) => {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('•')) {
+              return <li key={index}>{trimmedLine.substring(1).trim()}</li>;
+            } else if (trimmedLine.startsWith('**') && trimmedLine.includes(':**')) {
+              // Handle stage formatting
+              return (
+                <div key={index} className="stage-item">
+                  <div className="stage-title">{trimmedLine.replace(/\*\*/g, '')}</div>
+                </div>
+              );
+            } else if (trimmedLine) {
+              return <li key={index}>{trimmedLine}</li>;
+            }
+            return null;
+          }).filter(Boolean)}
+        </ul>
+      );
+    }
+    
+    // If no bullet points, return formatted text with line breaks
+    return <div dangerouslySetInnerHTML={{ __html: content.replace(/\n/g, '<br>') }} />;
+  };
+
   return (
     <div className="analysis-section slide-up">
       <h2 className="section-title">Analysis Results</h2>
       
       <div className="analysis-card">
         <h3>
+          <Eye size={20} />
           Observations
         </h3>
-        <p>{result.abnormalities || 'No specific observations noted.'}</p>
+        <div className="structured-content">
+          {formatContent(result.abnormalities)}
+        </div>
       </div>
 
       <div className="analysis-card">
         <h3>
+          <Clock size={20} />
           Healing Timeline
         </h3>
-        <p>{result.timeline || 'Timeline information not available.'}</p>
+        <div className="structured-content">
+          {formatContent(result.timeline)}
+        </div>
       </div>
 
       <div className="analysis-card">
         <h3>
+          <Heart size={20} />
           Care Recommendations
         </h3>
-        <p>{result.tips || 'No specific recommendations available.'}</p>
+        <div className="structured-content">
+          {formatContent(result.tips)}
+        </div>
       </div>
 
       <div className="alert alert-warning">
@@ -704,21 +747,34 @@ function App() {
       
       const conditionInfo = CONDITIONS.find(c => c.id === selectedCondition);
       
-      const prompt = `Analyze this medical photo of a ${conditionInfo.label.toLowerCase()}. Please provide:
+      const prompt = `Analyze this medical photo of a ${conditionInfo.label.toLowerCase()}. Provide a concise, well-structured response with exactly three sections:
 
-1. OBSERVATIONS: Describe what you observe in the image, noting any concerning features, colors, size, or characteristics. Be specific but not diagnostic.
+**OBSERVATIONS:**
+- List 2-3 key visual observations in bullet points
+- Note colors, size, texture, or concerning features
+- Keep each point brief (1 sentence max)
+- Be descriptive but not diagnostic
 
-2. HEALING TIMELINE: Provide a realistic timeframe for expected healing or improvement, including stages of healing if applicable.
+**HEALING TIMELINE:**
+- Provide expected timeframe in clear stages
+- Use format: "Stage 1 (Days 1-3): ...", "Stage 2 (Days 4-7): ..."
+- Include total expected healing time
+- Maximum 3 stages
 
-3. CARE RECOMMENDATIONS: Suggest evidence-based care recommendations to promote healing and recovery.
+**CARE RECOMMENDATIONS:**
+- List 3-5 specific, actionable recommendations
+- Use bullet points with clear instructions
+- Focus on evidence-based care
+- Include "See healthcare provider if..." warning
 
-Important notes:
-- Do not provide medical diagnoses or replace professional medical advice
-- Recommend seeing a healthcare provider if there are concerning features
-- Focus on general care and healing support
-- Be supportive but realistic in your assessment
+FORMATTING REQUIREMENTS:
+- Use bold headers (**OBSERVATIONS:**, **HEALING TIMELINE:**, **CARE RECOMMENDATIONS:**)
+- Use bullet points (•) for lists
+- Keep responses concise and scannable
+- No lengthy paragraphs
+- Maximum 2-3 sentences per bullet point
 
-Please format your response clearly with these three sections.`;
+IMPORTANT: Do not provide medical diagnoses. This is for informational purposes only.`;
 
       const base64Data = capturedPhoto.split(',')[1];
       
@@ -760,18 +816,44 @@ Please format your response clearly with these three sections.`;
     for (const line of lines) {
       const trimmedLine = line.trim();
       
-      if (trimmedLine.toLowerCase().includes('observation') || 
-          trimmedLine.toLowerCase().includes('abnormalit')) {
+      // Skip empty lines
+      if (!trimmedLine) continue;
+      
+      // Check for section headers (both with and without asterisks)
+      const lowerLine = trimmedLine.toLowerCase();
+      if (lowerLine.includes('observation') && lowerLine.includes(':')) {
         currentSection = 'abnormalities';
-      } else if (trimmedLine.toLowerCase().includes('timeline') || 
-                 trimmedLine.toLowerCase().includes('healing time')) {
+        continue;
+      } else if (lowerLine.includes('timeline') && lowerLine.includes(':')) {
         currentSection = 'timeline';
-      } else if (trimmedLine.toLowerCase().includes('care') || 
-                 trimmedLine.toLowerCase().includes('recommendation')) {
+        continue;
+      } else if ((lowerLine.includes('care') || lowerLine.includes('recommendation')) && lowerLine.includes(':')) {
         currentSection = 'tips';
-      } else if (trimmedLine && currentSection) {
-        sections[currentSection] += (sections[currentSection] ? '\n' : '') + trimmedLine;
+        continue;
       }
+      
+      // Process content lines for current section
+      if (trimmedLine && currentSection) {
+        let processedLine = trimmedLine;
+        
+        // Clean up bullet points and formatting
+        processedLine = processedLine.replace(/^\*\*|\*\*$/g, ''); // Remove bold asterisks
+        processedLine = processedLine.replace(/^[•\-\*]\s*/, '• '); // Normalize bullet points
+        processedLine = processedLine.replace(/^Stage\s+(\d+)\s*\(([^)]+)\):\s*/i, '**Stage $1 ($2):** '); // Format timeline stages
+        
+        // Skip duplicate content or formatting-only lines
+        if (processedLine.length > 3) {
+          sections[currentSection] += (sections[currentSection] ? '\n' : '') + processedLine;
+        }
+      }
+    }
+
+    // Clean up any remaining formatting issues
+    for (const key in sections) {
+      sections[key] = sections[key]
+        .replace(/\n\n+/g, '\n') // Remove multiple newlines
+        .replace(/^\n|\n$/g, '')  // Remove leading/trailing newlines
+        .trim();
     }
 
     return sections;
