@@ -617,6 +617,149 @@ body {
   line-height: 1.5;
 }
 
+/* Visual Timeline Styles */
+.visual-timeline {
+  margin: 16px 0 24px 0;
+  padding: 0;
+}
+
+.timeline-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.timeline-stage {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.timeline-stage:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.timeline-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border: 2px solid var(--gray-300);
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.timeline-dot.active {
+  background: var(--primary-blue);
+  border-color: var(--primary-blue);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.timeline-line {
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 24px;
+  background: var(--gray-200);
+  z-index: 1;
+}
+
+.timeline-content {
+  flex: 1;
+  padding-top: 4px;
+}
+
+.timeline-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.stage-number {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.stage-duration {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--gray-200);
+}
+
+.stage-description {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+/* Dark mode support for timeline */
+@media (prefers-color-scheme: dark) {
+  .timeline-dot {
+    background: var(--gray-800);
+    border-color: var(--gray-600);
+  }
+  
+  .timeline-line {
+    background: var(--gray-700);
+  }
+  
+  .stage-duration {
+    background: var(--gray-800);
+    border-color: var(--gray-700);
+  }
+}
+
+/* Mobile responsiveness for timeline */
+@media (max-width: 480px) {
+  .timeline-stage {
+    gap: 12px;
+  }
+  
+  .timeline-dot {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .timeline-line {
+    top: 28px;
+  }
+  
+  .timeline-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .stage-number {
+    font-size: 15px;
+  }
+}
+
 /* Alert Messages */
 .alert {
   border-radius: var(--radius);

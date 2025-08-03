@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Camera, Upload, RotateCcw, CheckCircle, AlertCircle, Settings, Activity, Scan, Home, User, Mail, Lock, Eye, EyeOff, Clock, Heart } from 'lucide-react';
+import { Camera, Upload, RotateCcw, CheckCircle, AlertCircle, Settings, Activity, Scan, Home, User, Mail, Lock, Eye, EyeOff, Clock, Heart, Circle, CheckCircle2 } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Initialize Gemini AI
@@ -232,6 +232,87 @@ function ConditionSelection({ conditions, selectedCondition, onSelect }) {
   );
 }
 
+function VisualTimeline({ timelineText }) {
+  const parseTimelineStages = (text) => {
+    if (!text) return [];
+    
+    const lines = text.split('\n').filter(line => line.trim());
+    const stages = [];
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      
+      // Look for stage patterns like "**Stage 1 (Days 1-3):** Description"
+      const stageMatch = trimmedLine.match(/\*\*Stage\s+(\d+)\s*\(([^)]+)\):\*\*\s*(.*)/i);
+      if (stageMatch) {
+        stages.push({
+          stage: parseInt(stageMatch[1]),
+          duration: stageMatch[2],
+          description: stageMatch[3] || ''
+        });
+      }
+      // Also look for bullet points that might be stage descriptions
+      else if (trimmedLine.startsWith('•') && stages.length > 0) {
+        const lastStage = stages[stages.length - 1];
+        if (!lastStage.description) {
+          lastStage.description = trimmedLine.substring(1).trim();
+        }
+      }
+    }
+    
+    // If no structured stages found, create a simple timeline
+    if (stages.length === 0) {
+      const timelineLines = lines.filter(line => line.trim() && !line.includes('Timeline') && !line.includes('TIMELINE'));
+      if (timelineLines.length > 0) {
+        stages.push({
+          stage: 1,
+          duration: 'Healing Period',
+          description: timelineLines.join(' ')
+        });
+      }
+    }
+    
+    return stages;
+  };
+
+  const stages = parseTimelineStages(timelineText);
+  
+  if (stages.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="visual-timeline">
+      <div className="timeline-container">
+        {stages.map((stage, index) => (
+          <div key={stage.stage} className="timeline-stage">
+            <div className="timeline-connector">
+              <div className={`timeline-dot ${index === 0 ? 'active' : ''}`}>
+                {index === 0 ? (
+                  <CheckCircle2 size={16} />
+                ) : (
+                  <Circle size={16} />
+                )}
+              </div>
+              {index < stages.length - 1 && <div className="timeline-line"></div>}
+            </div>
+            
+            <div className="timeline-content">
+              <div className="timeline-header">
+                <span className="stage-number">Stage {stage.stage}</span>
+                <span className="stage-duration">{stage.duration}</span>
+              </div>
+              <div className="stage-description">
+                {stage.description}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function AnalysisSection({ result, onNewScan }) {
   const formatContent = (content) => {
     if (!content) return 'No information available.';
@@ -286,6 +367,7 @@ function AnalysisSection({ result, onNewScan }) {
           <Clock size={20} />
           Healing Timeline
         </h3>
+        <VisualTimeline timelineText={result.timeline} />
         <div className="structured-content">
           {formatContent(result.timeline)}
         </div>
