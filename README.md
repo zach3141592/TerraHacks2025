@@ -37,19 +37,19 @@ npm install
 
 ### 3. Configure Environment
 
-Create a `.env` file in the project root:
+Copy the example environment file and add your API key:
 
 ```bash
-touch .env
+cp .env.example .env
 ```
 
-Add your API key to the `.env` file:
+Edit the `.env` file and replace the placeholder with your actual API key:
 
 ```env
 VITE_GEMINI_API_KEY=your_actual_api_key_here
 ```
 
-⚠️ **Important**: Never commit your actual API key to version control. The `.env` file should be added to `.gitignore`.
+⚠️ **Important**: Never commit your actual API key to version control. The `.env` file is already added to `.gitignore` to protect your sensitive data.
 
 ### 4. Run the Application
 
