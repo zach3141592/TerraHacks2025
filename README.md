@@ -1,5 +1,7 @@
 # DailyScan
 
+lets you scan cuts, bruises, snot, and more. See what's wrong and see how long it will take to get better.
+
 ## Setup Instructions
 
 ### 1. Clone and Install
